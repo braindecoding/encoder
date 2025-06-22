@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIP-based fMRI Embedding Architecture</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        
+        .figure-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .figure-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .figure-caption {
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.5;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .architecture-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        /* Top section - Data inputs */
+        .data-inputs {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .input-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-width: 150px;
+        }
+        
+        .fmri-input {
+            border: 3px solid #e74c3c;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+        }
+        
+        .image-input {
+            border: 3px solid #3498db;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+        }
+        
+        .input-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .input-dims {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .data-sample {
+            width: 60px;
+            height: 40px;
+            background: #ddd;
+            margin: 5px auto;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        /* Middle section - Processing pipelines */
+        .processing-pipelines {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            align-items: flex-start;
+        }
+        
+        .pipeline {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .pipeline-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .fmri-pipeline {
+            border-left: 4px solid #e74c3c;
+            padding-left: 20px;
+        }
+        
+        .image-pipeline {
+            border-right: 4px solid #3498db;
+            padding-right: 20px;
+        }
+        
+        .processing-step {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .fmri-step {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+        }
+        
+        .clip-step {
+            border-color: #3498db;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+        }
+        
+        .frozen-indicator {
+            background: #95a5a6;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .step-details {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .arrow-down {
+            font-size: 24px;
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        /* Bottom section - Contrastive learning */
+        .contrastive-section {
+            background: linear-gradient(135deg, #2ecc71 10%, #27ae60 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .contrastive-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .embedding-space {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .embedding-vector {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 120px;
+        }
+        
+        .vector-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .vector-dims {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+        
+        .similarity-arrow {
+            font-size: 20px;
+            color: white;
+        }
+        
+        .loss-formula {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        /* Architecture specifications table */
+        .specs-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .spec-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+        
+        .spec-table th, .spec-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .spec-table th {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .spec-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .training-params {
+            background: #ecf0f1;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .params-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .param-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+        
+        .param-label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        
+        .param-value {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="figure-container">
+        <div class="figure-title">
+            Figure 2: CLIP-based Contrastive Learning Architecture for fMRI-to-Image Embedding
+        </div>
+        
+        <div class="figure-caption">
+            The system employs contrastive learning to align fMRI neural representations with visual features in CLIP's embedding space. 
+            The fMRI encoder learns to map brain signals to the same 512-dimensional space as CLIP image embeddings, 
+            enabling cross-modal retrieval and reconstruction tasks through similarity-based matching.
+        </div>
+        
+        <div class="architecture-container">
+            <!-- Data Inputs -->
+            <div class="data-inputs">
+                <div class="input-box fmri-input">
+                    <div class="input-title">fMRI Data</div>
+                    <div class="input-dims">3092 voxels</div>
+                    <div class="data-sample">Brain</div>
+                    <div style="font-size: 10px; margin-top: 5px;">Miyawaki Dataset</div>
+                </div>
+                
+                <div style="font-size: 24px; color: #95a5a6;">+</div>
+                
+                <div class="input-box image-input">
+                    <div class="input-title">Visual Stimuli</div>
+                    <div class="input-dims">28×28 digits</div>
+                    <div class="data-sample">👁️</div>
+                    <div style="font-size: 10px; margin-top: 5px;">Digit Images</div>
+                </div>
+            </div>
+            
+            <!-- Processing Pipelines -->
+            <div class="processing-pipelines">
+                <!-- fMRI Pipeline -->
+                <div class="pipeline fmri-pipeline">
+                    <div class="pipeline-title">fMRI Processing Pipeline</div>
+                    
+                    <div class="processing-step fmri-step">
+                        <div class="step-title">Preprocessing</div>
+                        <div class="step-details">
+                            StandardScaler normalization<br>
+                            Z-score standardization
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-down">↓</div>
+                    
+                    <div class="processing-step fmri-step">
+                        <div class="step-title">Linear Layer 1</div>
+                        <div class="step-details">
+                            3092 → 4096<br>
+                            ReLU + Dropout(0.5) + BatchNorm
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-down">↓</div>
+                    
+                    <div class="processing-step fmri-step">
+                        <div class="step-title">Linear Layer 2</div>
+                        <div class="step-details">
+                            4096 → 2048<br>
+                            ReLU + Dropout(0.5) + BatchNorm
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-down">↓</div>
+                    
+                    <div class="processing-step fmri-step">
+                        <div class="step-title">Linear Layer 3</div>
+                        <div class="step-details">
+                            2048 → 1024<br>
+                            ReLU + Dropout(0.5) + BatchNorm
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-down">↓</div>
+                    
+                    <div class="processing-step fmri-step">
+                        <div class="step-title">Projection Layer</div>
+                        <div class="step-details">
+                            1024 → 512<br>
+                            L2 Normalization
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Pipeline -->
+                <div class="pipeline image-pipeline">
+                    <div class="pipeline-title">Image Processing Pipeline</div>
+                    
+                    <div class="processing-step clip-step">
+                        <div class="step-title">Image Preprocessing</div>
+                        <div class="step-details">
+                            28×28 → 224×224 resize<br>
+                            RGB conversion<br>
+                            CLIP normalization
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-down">↓</div>
+                    
+                    <div class="processing-step clip-step">
+                        <div class="step-title">CLIP ViT-B/32</div>
+                        <div class="step-details">
+                            Vision Transformer<br>
+                            Pre-trained encoder
+                        </div>
+                        <div class="frozen-indicator">FROZEN</div>
+                    </div>
+                    
+                    <div class="arrow-down">↓</div>
+                    
+                    <div class="processing-step clip-step">
+                        <div class="step-title">Image Embeddings</div>
+                        <div class="step-details">
+                            512-dimensional features<br>
+                            L2 Normalized
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contrastive Learning Section -->
+            <div class="contrastive-section">
+                <div class="contrastive-title">Contrastive Learning Alignment</div>
+                
+                <div class="embedding-space">
+                    <div class="embedding-vector">
+                        <div class="vector-title">fMRI Embeddings</div>
+                        <div class="vector-dims">ℝ⁵¹² (learned)</div>
+                    </div>
+                    
+                    <div class="similarity-arrow">↔</div>
+                    
+                    <div class="embedding-vector">
+                        <div class="vector-title">CLIP Embeddings</div>
+                        <div class="vector-dims">ℝ⁵¹² (fixed)</div>
+                    </div>
+                </div>
+                
+                <div class="loss-formula">
+                    <strong>Contrastive Loss Function:</strong><br>
+                    logits = (fMRI_emb @ CLIP_emb.T) / temperature<br>
+                    L = (CE(logits, labels) + CE(logits.T, labels)) / 2<br><br>
+                    <strong>Temperature:</strong> τ = 0.07<br>
+                    <strong>Objective:</strong> Maximize similarity for matched pairs
+                </div>
+            </div>
+        </div>
+        
+        <!-- Specifications Section -->
+        <div class="specs-section">
+            <div>
+                <table class="spec-table">
+                    <thead>
+                        <tr>
+                            <th colspan="3">fMRI Encoder Architecture</th>
+                        </tr>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Input → Output</th>
+                            <th>Parameters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Hidden 1</strong></td>
+                            <td>3092 → 4096</td>
+                            <td>12,665,856</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hidden 2</strong></td>
+                            <td>4096 → 2048</td>
+                            <td>8,390,656</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hidden 3</strong></td>
+                            <td>2048 → 1024</td>
+                            <td>2,098,176</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Projection</strong></td>
+                            <td>1024 → 512</td>
+                            <td>524,800</td>
+                        </tr>
+                        <tr style="background: #34495e; color: white;">
+                            <td><strong>Total</strong></td>
+                            <td>-</td>
+                            <td><strong>23,679,488</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="training-params">
+                <div class="params-title">Training Configuration</div>
+                
+                <div class="param-item">
+                    <span class="param-label">Optimizer:</span>
+                    <span class="param-value">Adam</span>
+                </div>
+                
+                <div class="param-item">
+                    <span class="param-label">Learning Rate:</span>
+                    <span class="param-value">1e-3</span>
+                </div>
+                
+                <div class="param-item">
+                    <span class="param-label">Weight Decay:</span>
+                    <span class="param-value">1e-4</span>
+                </div>
+                
+                <div class="param-item">
+                    <span class="param-label">Batch Size:</span>
+                    <span class="param-value">32</span>
+                </div>
+                
+                <div class="param-item">
+                    <span class="param-label">Epochs:</span>
+                    <span class="param-value">100</span>
+                </div>
+                
+                <div class="param-item">
+                    <span class="param-label">Scheduler:</span>
+                    <span class="param-value">CosineAnnealingLR</span>
+                </div>
+                
+                <div class="param-item">
+                    <span class="param-label">Dropout Rate:</span>
+                    <span class="param-value">0.5</span>
+                </div>
+                
+                <div class="param-item">
+                    <span class="param-label">Temperature:</span>
+                    <span class="param-value">0.07</span>
+                </div>
+                
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #bdc3c7;">
+                    <div class="param-item">
+                        <span class="param-label">Evaluation Metrics:</span>
+                        <span class="param-value">Top-k Retrieval Accuracy</span>
+                    </div>
+                    
+                    <div class="param-item">
+                        <span class="param-label">k values:</span>
+                        <span class="param-value">[1, 5, 10]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
