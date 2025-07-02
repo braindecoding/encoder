@@ -1,0 +1,22 @@
+import torch
+import torch.nn as nn
+
+class DigitEmbeddingModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Embedding untuk 10 digit (0-9)
+        self.digit_embedding = nn.Embedding(10, 64)
+        self.hidden = nn.Linear(64, 128)
+        self.output = nn.Linear(128, 10)
+    
+    def forward(self, digit_indices):
+        # digit_indices: [batch_size]
+        embedded = self.digit_embedding(digit_indices)  # [batch_size, 64]
+        hidden = torch.relu(self.hidden(embedded))      # [batch_size, 128]
+        output = self.output(hidden)                    # [batch_size, 10]
+        return output
+
+# Penggunaan
+model = DigitEmbeddingModel()
+digit_ids = torch.LongTensor([0, 1, 2, 3, 4])  # digits 0-4
+predictions = model(digit_ids)
